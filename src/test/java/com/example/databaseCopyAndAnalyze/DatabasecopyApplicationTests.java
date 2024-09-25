@@ -1,4 +1,4 @@
-package com.example.databasecopy;
+package com.example.databaseCopyAndAnalyze;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
