@@ -10,4 +10,15 @@ public class ModuleEntity {
     private Long id;
     @Column(unique = true)
     private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return "ModuleEntity{" +
+                "name='" + name + '\'' +
+                '}';
+    }
 }

@@ -28,7 +28,7 @@ public class SourceEntityManagerConfiguration {
             EntityManagerFactoryBuilder builder, @Qualifier("sourceDataSource") DataSource dataSource
             ){
         Map<String, Object> properties = new HashMap<>();
-        properties.put("hibernate.hbm2ddl.auto", "create");
+        properties.put("hibernate.hbm2ddl.auto", "update");
         return builder
                 .dataSource(dataSource)
                 .properties(properties)

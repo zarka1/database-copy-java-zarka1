@@ -1,5 +1,6 @@
 package com.example.databaseCopyAndAnalyze.sourceDatabase.model;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -15,9 +16,25 @@ public class ExamEntityJSON {
     @GeneratedValue
     private Long id;
     @JdbcTypeCode(SqlTypes.JSON)
-    private Map<String, String> attributes;
+    private Map<String, JsonNode> attributes;
 
-    public void setAttributes(Map<String, String> attributes) {
+    public void setAttributes(Map<String, JsonNode> attributes) {
         this.attributes = attributes;
+    }
+
+    @Override
+    public String toString() {
+        return "ExamEntityJSON{" +
+                "id=" + id +
+                ", attributes=" + attributes +
+                '}';
+    }
+
+    public Map<String, JsonNode> getAttributes(){
+        return this.attributes;
+    }
+
+    public Long getId() {
+        return id;
     }
 }
