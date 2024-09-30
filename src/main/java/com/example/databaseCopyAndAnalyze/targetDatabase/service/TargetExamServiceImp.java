@@ -9,6 +9,7 @@ import java.io.IOException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -58,8 +59,8 @@ public class TargetExamServiceImp {
             saveExamToRepo(examsNotValid, userTypes, modules, users, exam);
         }
     }
-
-    private void saveExamToRepo(List<ExamEntityJSON> examsNotValid, List<UserTypeEntity> userTypes, List<ModuleEntity> modules, List<UserEntity> users, ExamEntityJSON exam) {
+    @Transactional
+    public void saveExamToRepo(List<ExamEntityJSON> examsNotValid, List<UserTypeEntity> userTypes, List<ModuleEntity> modules, List<UserEntity> users, ExamEntityJSON exam) {
         ExamEntity examEntity = new ExamEntity();
         setModule(examsNotValid, modules, exam, examEntity);
         setUser(examsNotValid, userTypes, users, exam, examEntity, "mentor", 0);

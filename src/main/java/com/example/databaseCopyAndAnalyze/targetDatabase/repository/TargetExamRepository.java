@@ -12,4 +12,5 @@ import java.util.List;
 
 public interface TargetExamRepository extends JpaRepository<ExamEntity, Long> {
     List<ExamEntity> findByModuleAndStudentAndCancelledIsFalse(ModuleEntity module, UserEntity student);
+    List<ExamEntity> findByMentor(UserEntity mentor);
 }

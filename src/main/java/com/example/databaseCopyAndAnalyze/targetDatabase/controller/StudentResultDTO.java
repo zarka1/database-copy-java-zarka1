@@ -2,5 +2,5 @@ package com.example.databaseCopyAndAnalyze.targetDatabase.controller;
 
 import java.util.Map;
 
-public record UserResultDTO(String email, Map<String, Double> results) {
+public record StudentResultDTO(String email, Map<String, Double> results) {
 }
