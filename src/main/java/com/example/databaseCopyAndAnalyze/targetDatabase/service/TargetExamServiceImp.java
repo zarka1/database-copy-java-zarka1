@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -54,18 +55,22 @@ public class TargetExamServiceImp {
             if(alreadyExist){
                 continue;
             }
-            ExamEntity examEntity = new ExamEntity();
-            setModule(examsNotValid, modules, exam, examEntity);
-            setUser(examsNotValid, userTypes, users, exam, examEntity, "mentor", 0);
-            setUser(examsNotValid, userTypes, users, exam, examEntity, "student", 1);
-            setDate(examsNotValid, exam, examEntity);
-            setBooleanFields(examsNotValid, exam, examEntity, "cancelled");
-            setBooleanFields(examsNotValid, exam, examEntity, "success");
-            setComment(examsNotValid, exam, examEntity);
-            setResults(examsNotValid, exam, examEntity);
-            examEntity.setIdInSource(exam.getId());
-            targetExamRepository.save(examEntity);
+            saveExamToRepo(examsNotValid, userTypes, modules, users, exam);
         }
+    }
+
+    private void saveExamToRepo(List<ExamEntityJSON> examsNotValid, List<UserTypeEntity> userTypes, List<ModuleEntity> modules, List<UserEntity> users, ExamEntityJSON exam) {
+        ExamEntity examEntity = new ExamEntity();
+        setModule(examsNotValid, modules, exam, examEntity);
+        setUser(examsNotValid, userTypes, users, exam, examEntity, "mentor", 0);
+        setUser(examsNotValid, userTypes, users, exam, examEntity, "student", 1);
+        setDate(examsNotValid, exam, examEntity);
+        setBooleanFields(examsNotValid, exam, examEntity, "cancelled");
+        setBooleanFields(examsNotValid, exam, examEntity, "success");
+        setComment(examsNotValid, exam, examEntity);
+        setResults(examsNotValid, exam, examEntity);
+        examEntity.setIdInSource(exam.getId());
+        targetExamRepository.save(examEntity);
     }
 
     private void setUser(List<ExamEntityJSON> examsNotValid,
@@ -77,26 +82,24 @@ public class TargetExamServiceImp {
                          int numberOfElementInUserTypes) {
         if (!containsValidUser(users, exam, userTypes.get(numberOfElementInUserTypes), userType).isEmpty()) {
             examEntity.setUser(containsValidUser(users, exam, userTypes.get(numberOfElementInUserTypes), userType).get(), userType);
-            System.out.println("mentor:" + examEntity.getMentor());
-            System.out.println("student:" + examEntity.getStudent());
         } else {
             examsNotValid.add(exam);
         }
     }
 
     private void setModule(List<ExamEntityJSON> examsNotValid, List<ModuleEntity> modules, ExamEntityJSON exam, ExamEntity examEntity) {
-        if (!containsValidModule(modules, exam).isEmpty()) {
+        if (containsValidModule(modules, exam).isPresent()) {
             examEntity.setModule(containsValidModule(modules, exam).get());
-            System.out.println(examEntity.getModule().toString());
         } else {
             examsNotValid.add(exam);
         }
     }
 
     private void setDate(List<ExamEntityJSON> examsNotValid, ExamEntityJSON exam, ExamEntity examEntity) {
-        if (!containsValidDate(exam).isEmpty()) {
+        if (containsValidDate(exam).isPresent()) {
             examEntity.setDate(containsValidDate(exam).get());
-            System.out.println(examEntity.getDate());
+        } else {
+            examsNotValid.add(exam);
         }
     }
 
@@ -105,9 +108,7 @@ public class TargetExamServiceImp {
             return Optional.empty();
         }
         for (ModuleEntity module : modules) {
-            //System.out.println("from exam" + exam.getAttributes().get("module"));
-            //System.out.println(module.getName());
-            if (module.getName().toString().equals(exam.getAttributes().get("module").toString())) {
+            if (module.getName().equals(exam.getAttributes().get("module").toString())) {
                 return Optional.of(module);
             }
         }
@@ -119,10 +120,7 @@ public class TargetExamServiceImp {
             return Optional.empty();
         }
         for (UserEntity user : users) {
-            /*System.out.println("from userentity:" + user.getEmail().toString());
-            System.out.println("from examentity:" + exam.getAttributes().get(userType).toString());
-            System.out.println(user.getEmail().toString().equals(exam.getAttributes().get(userType).toString()));*/
-            if (user.getEmail().toString().equals(exam.getAttributes().get(userType).toString()) &&
+            if (user.getEmail().equals(exam.getAttributes().get(userType).toString()) &&
                     user.getUserType().equals(type)) {
                 return Optional.of(user);
             }
@@ -147,10 +145,8 @@ public class TargetExamServiceImp {
                                   ExamEntityJSON exam,
                                   ExamEntity examEntity,
                                   String booleanField) {
-        if (!containsValidBooleanField( exam, booleanField).isEmpty()) {
+        if (containsValidBooleanField( exam, booleanField).isPresent()) {
             examEntity.setBooleanField(containsValidBooleanField( exam, booleanField).get(), booleanField);
-            System.out.println("cancelled: " + examEntity.isCancelled());
-            System.out.println("success: " + examEntity.isSuccess());
         } else {
             examsNotValid.add(exam);
         }
@@ -173,7 +169,6 @@ public class TargetExamServiceImp {
                                   ExamEntity examEntity) {
         if (exam.getAttributes().containsKey("comment")) {
             examEntity.setComment(exam.getAttributes().get("comment").toString());
-            System.out.println(examEntity.getComment());
         } else {
             examsNotValid.add(exam);
         }
@@ -190,22 +185,7 @@ public class TargetExamServiceImp {
         rootNode= objectMapper.readTree(jsonString);
         JsonNode resultsNode = rootNode.path("results");
         for (JsonNode resultNode : resultsNode) {
-            ResultEntity resultEntity = new ResultEntity();
-            if(resultNode.path("dimension").asText() != "") {
-                resultEntity.setDimension(resultNode.path("dimension").asText());
-            } else {
-                examsNotValid.add(exam);
-                continue;
-            }
-            int result = resultNode.path("result").asInt();
-            if (result >= 0 && result <= 100){
-                resultEntity.setResult(result);
-            } else {
-                examsNotValid.add(exam);
-                continue;
-            }
-            results.add(resultEntity);
-            resultRepository.save(resultEntity);
+            saveValidResultsToRepo(examsNotValid, exam, results, resultNode);
         }
         if(results.size() != 0){
             return Optional.of(results);
@@ -213,9 +193,28 @@ public class TargetExamServiceImp {
         else return Optional.empty();
     }
 
+    private void saveValidResultsToRepo(List<ExamEntityJSON> examsNotValid, ExamEntityJSON exam, List<ResultEntity> results, JsonNode resultNode) {
+        ResultEntity resultEntity = new ResultEntity();
+        if(!Objects.equals(resultNode.path("dimension").asText(), "")) {
+            resultEntity.setDimension(resultNode.path("dimension").asText());
+        } else {
+            examsNotValid.add(exam);
+            return;
+        }
+        int result = resultNode.path("result").asInt();
+        if (result >= 0 && result <= 100){
+            resultEntity.setResult(result);
+        } else {
+            examsNotValid.add(exam);
+            return;
+        }
+        results.add(resultEntity);
+        resultRepository.save(resultEntity);
+    }
+
     private void setResults(List<ExamEntityJSON> examsNotValid, ExamEntityJSON exam, ExamEntity examEntity){
         try{
-            if(!containsValidResults(examsNotValid, exam).isEmpty()){
+            if(containsValidResults(examsNotValid, exam).isPresent()){
                 examEntity.setResults(containsValidResults(examsNotValid, exam).get());
             }
         } catch(IOException e){

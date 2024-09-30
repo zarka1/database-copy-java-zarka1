@@ -32,43 +32,50 @@ public class UserServiceImp {
             List<ExamEntity> examforStudentAndModule = new ArrayList<>();
             Map<String, Double> resultsMap = new HashMap<>();
             for(ModuleEntity module : modules){
-                List<ExamEntity> examsforStudentAndModule = new ArrayList<>();
-                examsforStudentAndModule.addAll(examRepository
-                        .findByModuleAndStudentAndCancelledIsFalse(module, student));
-                Collections.sort(examsforStudentAndModule, Comparator.comparing(ExamEntity::getDate));
-                if(examsforStudentAndModule.size() > 0){
-                    examforStudentAndModule.add(examsforStudentAndModule.get(examsforStudentAndModule.size()-1));
-                }
+                getTheLastExamForModul(student, examforStudentAndModule, module);
             }
             List<String> dimensions = new ArrayList<>();
-            for(ExamEntity exam : examforStudentAndModule){
-                System.out.println(exam.getModule());
-                System.out.println(exam.getDate());
-                System.out.println("examresults: " + exam.getResults());
-            }
-            for(ExamEntity exam : examforStudentAndModule){
-                for (ResultEntity result : exam.getResults()){
-                    if(!dimensions.contains(result.getDimension())){
-                        dimensions.add(result.getDimension());
-                    }
-                }
-            }
+            getAllDimensions(examforStudentAndModule, dimensions);
             for (String dimension : dimensions) {
-                int sumOfResults = 0;
-                int numberOfResults = 0;
-                for (ExamEntity exam : examforStudentAndModule) {
-                    for (ResultEntity result : exam.getResults()) {
-                        if (result.getDimension().equals(dimension)) {
-                            sumOfResults += result.getResult();
-                            numberOfResults++;
-                        }
-                    }
-                }
-               resultsMap.put(dimension, (double) sumOfResults / numberOfResults);
+                calculateResultForDimension(examforStudentAndModule, resultsMap, dimension);
             }
             UserResultDTO userResultDTO = new UserResultDTO(student.getName(), resultsMap);
             results.add(userResultDTO);
         }
         return results;
+    }
+
+    private void getTheLastExamForModul(UserEntity student, List<ExamEntity> examforStudentAndModule, ModuleEntity module) {
+        List<ExamEntity> examsforStudentAndModule = new ArrayList<>();
+        examsforStudentAndModule.addAll(examRepository
+                .findByModuleAndStudentAndCancelledIsFalse(module, student));
+        Collections.sort(examsforStudentAndModule, Comparator.comparing(ExamEntity::getDate));
+        if(examsforStudentAndModule.size() > 0){
+            examforStudentAndModule.add(examsforStudentAndModule.get(examsforStudentAndModule.size()-1));
+        }
+    }
+
+    private static void getAllDimensions(List<ExamEntity> examforStudentAndModule, List<String> dimensions) {
+        for(ExamEntity exam : examforStudentAndModule){
+            for (ResultEntity result : exam.getResults()){
+                if(!dimensions.contains(result.getDimension())){
+                    dimensions.add(result.getDimension());
+                }
+            }
+        }
+    }
+
+    private static void calculateResultForDimension(List<ExamEntity> examforStudentAndModule, Map<String, Double> resultsMap, String dimension) {
+        int sumOfResults = 0;
+        int numberOfResults = 0;
+        for (ExamEntity exam : examforStudentAndModule) {
+            for (ResultEntity result : exam.getResults()) {
+                if (result.getDimension().equals(dimension)) {
+                    sumOfResults += result.getResult();
+                    numberOfResults++;
+                }
+            }
+        }
+        resultsMap.put(dimension, (double) sumOfResults / numberOfResults);
     }
 }
