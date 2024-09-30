@@ -19,4 +19,20 @@ public class ResultEntity {
     public void setResult(int result) {
         this.result = result;
     }
+
+    @Override
+    public String toString() {
+        return "ResultEntity{" +
+                "dimension='" + dimension + '\'' +
+                ", result=" + result +
+                '}';
+    }
+
+    public String getDimension() {
+        return dimension;
+    }
+
+    public int getResult() {
+        return result;
+    }
 }

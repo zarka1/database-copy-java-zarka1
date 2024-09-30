@@ -36,7 +36,7 @@ public class TargetExamServiceImp {
         this.resultRepository = resultRepository;
     }
 
-    public void copySourceToTarget() throws IOException {
+    public void copySourceToTarget() {
         List<ExamEntityJSON> examsNotValid = new ArrayList<>();
         List<UserTypeEntity> userTypes = userTypeRepository.findAll();
         List<ExamEntityJSON> jsonExams = sourceExamRepository.findAll();
@@ -186,12 +186,9 @@ public class TargetExamServiceImp {
         List<ResultEntity> results = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonString = "{\"results\":" + exam.getAttributes().get("results") + "}";
-        System.out.println("string" + exam);
         JsonNode rootNode;
         rootNode= objectMapper.readTree(jsonString);
-        System.out.println(rootNode);
         JsonNode resultsNode = rootNode.path("results");
-        System.out.println(resultsNode.isArray());
         for (JsonNode resultNode : resultsNode) {
             ResultEntity resultEntity = new ResultEntity();
             if(resultNode.path("dimension").asText() != "") {
@@ -201,7 +198,7 @@ public class TargetExamServiceImp {
                 continue;
             }
             int result = resultNode.path("result").asInt();
-            if (result > 0 && result < 100){
+            if (result >= 0 && result <= 100){
                 resultEntity.setResult(result);
             } else {
                 examsNotValid.add(exam);

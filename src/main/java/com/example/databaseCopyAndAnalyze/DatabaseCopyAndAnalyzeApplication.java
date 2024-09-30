@@ -34,7 +34,7 @@ public class DatabaseCopyAndAnalyzeApplication implements CommandLineRunner{
 
     @Override
     public void run(String... args) throws Exception {
-        jdbcTemplate.execute("INSERT INTO  usertypeentity (ID, NAME) VALUES (1, '\"mentor\"')");
+        /*jdbcTemplate.execute("INSERT INTO  usertypeentity (ID, NAME) VALUES (1, '\"mentor\"')");
         jdbcTemplate.execute("INSERT INTO usertypeentity (ID, NAME) VALUES (2, '\"student\"')");
         jdbcTemplate.execute("INSERT INTO  moduleentity (ID, NAME) VALUES (1, '\"ProgBasics\"')");
         jdbcTemplate.execute("INSERT INTO moduleentity (ID, NAME) VALUES (2, '\"Web\"')");
@@ -64,6 +64,6 @@ public class DatabaseCopyAndAnalyzeApplication implements CommandLineRunner{
         userEntity4.setDob(LocalDate.of(1995, 10, 16));
         userEntity4.setEmail("\"peter.szarka@codecool.com\"");
         userEntity4.setUserType(userTypeEntities.get(0));
-        userEntityRepository.save(userEntity4);
+        userEntityRepository.save(userEntity4);*/
     }
 }

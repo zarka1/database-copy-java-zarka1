@@ -23,7 +23,7 @@ public class ExamEntity {
     private boolean cancelled;
     private boolean success;
     private String comment;
-    @OneToMany
+    @OneToMany (fetch = FetchType.EAGER)
     private List<ResultEntity> results;
 
     public void setModule(ModuleEntity module) {
@@ -109,7 +109,7 @@ public class ExamEntity {
     @Override
     public String toString() {
         return "ExamEntity{" +
-                "results=" + results +
+                "results=" + results.toString() +
                 '}';
     }
 
