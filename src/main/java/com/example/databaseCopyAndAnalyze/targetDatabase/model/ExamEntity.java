@@ -118,6 +118,7 @@ public class ExamEntity {
     }
 
     public boolean equalsWithExamFromSource(ExamEntityJSON examEntityJSON){
+        if(idInSource == null) return false;
         if(idInSource.equals(examEntityJSON.getId())){
             return true;
         }
