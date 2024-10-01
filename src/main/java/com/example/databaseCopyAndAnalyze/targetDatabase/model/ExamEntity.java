@@ -23,7 +23,7 @@ public class ExamEntity {
     private boolean cancelled;
     private boolean success;
     private String comment;
-    @OneToMany ( fetch = FetchType.EAGER)
+    @OneToMany ( mappedBy = "examEntity", fetch = FetchType.EAGER)
     private List<ResultEntity> results;
 
     public void setModule(ModuleEntity module) {
@@ -103,7 +103,7 @@ public class ExamEntity {
     }
 
     public List<ResultEntity> getResults() {
-        return results;
+  return results;
     }
 
     @Override

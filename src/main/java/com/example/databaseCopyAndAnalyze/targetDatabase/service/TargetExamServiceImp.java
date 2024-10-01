@@ -10,7 +10,6 @@ import java.io.IOException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
-import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -189,7 +188,7 @@ public class TargetExamServiceImp {
         rootNode= objectMapper.readTree(jsonString);
         JsonNode resultsNode = rootNode.path("results");
         for (JsonNode resultNode : resultsNode) {
-            saveValidResultsToRepo(examsNotValid, exam, results, resultNode, examEntity);
+            saveValidResultsToList(examsNotValid, exam, results, resultNode, examEntity);
         }
         if(results.size() != 0){
             return Optional.of(results);
@@ -197,7 +196,7 @@ public class TargetExamServiceImp {
         else return Optional.empty();
     }
 
-    private void saveValidResultsToRepo(List<ExamEntityJSON> examsNotValid, ExamEntityJSON exam, List<ResultEntity> results, JsonNode resultNode, ExamEntity examEntity) {
+    private void saveValidResultsToList(List<ExamEntityJSON> examsNotValid, ExamEntityJSON exam, List<ResultEntity> results, JsonNode resultNode, ExamEntity examEntity) {
         ResultEntity resultEntity = new ResultEntity();
         if(!Objects.equals(resultNode.path("dimension").asText(), "")) {
             resultEntity.setDimension(resultNode.path("dimension").asText());
@@ -213,13 +212,17 @@ public class TargetExamServiceImp {
             return;
         }
         results.add(resultEntity);
-        resultRepository.saveAndFlush(resultEntity);
+        resultEntity.setExamEntity(examEntity);
     }
 
     private void setResults(List<ExamEntityJSON> examsNotValid, ExamEntityJSON exam, ExamEntity examEntity){
         try{
             if(containsValidResults(examsNotValid, exam, examEntity).isPresent()){
-                examEntity.setResults(containsValidResults(examsNotValid, exam, examEntity).get());
+                List<ResultEntity> results = containsValidResults(examsNotValid, exam, examEntity).get();
+                for (ResultEntity resultEntity : results){
+                    resultRepository.save(resultEntity);
+                }
+                examEntity.setResults(results);
             }
         } catch(IOException e){
             examsNotValid.add(exam);

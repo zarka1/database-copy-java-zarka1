@@ -9,6 +9,9 @@ public class ResultEntity {
     private Long id;
     private String dimension;
     private int result;
+    @ManyToOne
+    @JoinColumn (name = "examentity_id")
+    private ExamEntity examEntity;
 
     public void setDimension(String dimension) {
         this.dimension = dimension;
@@ -32,5 +35,9 @@ public class ResultEntity {
 
     public int getResult() {
         return result;
+    }
+
+    public void setExamEntity(ExamEntity examEntity) {
+        this.examEntity = examEntity;
     }
 }

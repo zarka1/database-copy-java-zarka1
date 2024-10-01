@@ -92,27 +92,24 @@ public class UserServiceImp {
         long numberOfEntities = resultEntities.stream()
                 .count();
         double average = (double) sumOfResults / numberOfEntities;
+        System.out.println(average);
         for (UserEntity mentor : mentors){
-            saveMentorIfOutstanding(ratio, results, average, mentor);
-        }
-        return results;
-    }
-
-    private void saveMentorIfOutstanding(double ratio, List<String> results, double average, UserEntity mentor) {
-        List<ExamEntity> examsForMentor = examRepository.findByMentor(mentor);
-        int sumResults = 0;
-        int numberOfResults = 0;
-        for(ExamEntity examEntity : examsForMentor){
-            for(ResultEntity result : examEntity.getResults()){
-                sumResults += result.getResult();
-                numberOfResults++;
+            List<ExamEntity> examsForMentor = examRepository.findByMentor(mentor);
+            int sumResults = 0;
+            int numberOfResults = 0;
+            for(ExamEntity examEntity : examsForMentor){
+                for(ResultEntity result : examEntity.getResults()){
+                    sumResults += result.getResult();
+                    numberOfResults++;
+                }
+            }
+            double averageOfMentor = sumResults / numberOfResults;
+            if (ratio < 1 && averageOfMentor < average * ratio){
+                results.add(mentor.getName());
+            } else if(ratio > 1 && averageOfMentor > average * ratio){
+                results.add(mentor.getName());
             }
         }
-        double averageOfMentor = sumResults / numberOfResults;
-        if (ratio < 1 && averageOfMentor < average * ratio){
-            results.add(mentor.getName());
-        } else if(ratio > 1 && averageOfMentor > average * ratio){
-            results.add(mentor.getName());
-        }
+        return results;
     }
 }
