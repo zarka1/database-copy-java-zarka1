@@ -30,7 +30,7 @@ public class StudentRiportController {
 
     @GetMapping("api/getstudentresults")
     public ResponseEntity<?> getUserResults(){
-        List<UserResultDTO> results = userServiceImp.getStudentResults();
+        List<StudentResultDTO> results = userServiceImp.getStudentResults();
         return ResponseEntity.ok(results);
     }
 

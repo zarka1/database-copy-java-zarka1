@@ -23,7 +23,7 @@ public class ExamEntity {
     private boolean cancelled;
     private boolean success;
     private String comment;
-    @OneToMany (fetch = FetchType.EAGER)
+    @OneToMany ( fetch = FetchType.EAGER)
     private List<ResultEntity> results;
 
     public void setModule(ModuleEntity module) {
@@ -118,7 +118,8 @@ public class ExamEntity {
     }
 
     public boolean equalsWithExamFromSource(ExamEntityJSON examEntityJSON){
-        if(idInSource == examEntityJSON.getId()){
+        if(idInSource == null) return false;
+        if(idInSource.equals(examEntityJSON.getId())){
             return true;
         }
         return false;
